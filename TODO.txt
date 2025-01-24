@@ -1,0 +1,38 @@
+Make asteroid have hp and be able to be destroyed V
+Make asteroids spawn from the sides of the screen towards the center V
+Make asteroids less round V
+Make ship get destroyed when hit by an asteroid V
+Make thrusters sound V
+Make ore asteroids that drop ores V
+Add ore collecting V and weight UI (A vertical bar with EMPTY at the bottom and FULL at the top and a line indicating current) V
+Make asteroid hitboxes fit lines V
+Find a way to communicate the hp to the player and implement it (player gets 1 indent on their ship per missing hp) V
+Fix overlapping spawned asteroids by doing a shapecast on spawn V
+Handle death:
+- spaceship despawned V
+- it is destroyed into it's composing lines V
+- camera stays V
+- PRESS R TO RETRY pops up with larger lines (if visibility is an issue) V
+- Restart the scene if r is pressed V
+FIX: fix thrusters sound after death V
+Make the ores have actual colliders V
+Clean and push to a repo
+Refactor linerenderer
+Make a lil video for #showcase
+Add shops with selling point
+ - Make a big asteroid spawn near the player spawn with something on it's surface
+ - Conceptualize the art and make it
+ - Add a working force field to the asteroid
+ - Add the "bubble" where the player can get in and out
+ - Add selling the ore when entering the bubble with an animation of the actual ore leaving the ship
+ - Add the floating signs that you can select by pointing at them
+ - Add actual upgrades and repairing (Laser damage, inventory size, engine power)
+ - Make a new spawn rule, that if no shop is < x units from the player, a new one is spawned (and old ones despawned)
+ - Add a random chance for a sign asteroid to spawn, it holds a rotating Arrow that always points to the shop, and a SHOP text that always points down
+
+
+Optional:
+Make asteroids break off into smaller ones
+
+Refactors:
+Rework LineRenderer into a single LineRender component that updates the material parameters OnChange<>.
