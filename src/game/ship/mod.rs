@@ -15,8 +15,8 @@ use crate::{
     health::{DamageTaken, Death, Health, HealthHitInvincibilityTime, HealthManager},
     level_manager::LevelScoped,
     line_group::LineGroup,
+    line_mesh::LineMesh,
     rand::{random_range, random_vec2_range},
-    system_param::LineRenderer,
 };
 
 use super::{CurrentGameState, GameState};
@@ -105,11 +105,11 @@ fn update(
     }
 }
 
-pub fn spawn_ship(commands: &mut Commands, line_renderer: &mut LineRenderer) -> Entity {
+pub fn spawn_ship(commands: &mut Commands) -> Entity {
     let (ship_shape, thruster_shape) = get_ship_and_thrusters_shape(3);
-    let ship = line_renderer.spawn(
-        ship_shape,
-        (
+    let ship = commands
+        .spawn((
+            LineMesh(ship_shape),
             RigidBody::Dynamic,
             Collider::circle(10.),
             ExternalForce::default().with_persistence(false),
@@ -126,13 +126,16 @@ pub fn spawn_ship(commands: &mut Commands, line_renderer: &mut LineRenderer) -> 
             },
             Inventory::new(10),
             LevelScoped,
-        ),
-    );
+        ))
+        .id();
 
-    let thrusters = line_renderer.spawn(
-        thruster_shape,
-        (ThrustersVisuals, Blink::new(15., false, Visibility::Hidden)),
-    );
+    let thrusters = commands
+        .spawn((
+            LineMesh(thruster_shape),
+            ThrustersVisuals,
+            Blink::new(15., false, Visibility::Hidden),
+        ))
+        .id();
 
     commands.entity(ship).add_child(thrusters);
     return ship;
@@ -155,18 +158,17 @@ pub fn ship_blink(
 }
 
 pub fn ship_hurt(
+    mut commands: Commands,
     mut audio_manager: AudioManager,
     mut damage_r: EventReader<DamageTaken>,
     ship_q: Query<Entity, With<Ship>>,
-    mut line_renderer: LineRenderer,
 ) {
     for damage in damage_r.read() {
         if let Ok(ship) = ship_q.get(damage.entity) {
             audio_manager.play_sound(PlayAudio2D::new_once("sounds/hurt.wav".to_string()));
-            line_renderer.update(
-                ship,
+            commands.entity(ship).insert(LineMesh(
                 get_ship_and_thrusters_shape((damage.new_hp / 10.) as u32).0,
-            );
+            ));
         }
     }
 }
@@ -175,27 +177,24 @@ pub fn ship_death(
     mut commands: Commands,
     mut audio_manager: AudioManager,
     mut death_r: EventReader<Death>,
-    ship_q: Query<(Entity, &Transform, &LinearVelocity), With<Ship>>,
-    mut line_renderer: LineRenderer,
+    ship_q: Query<(Entity, &Transform, &LinearVelocity, &LineMesh), With<Ship>>,
     mut game_state: ResMut<CurrentGameState>,
 ) {
     for death in death_r.read() {
         audio_manager.play_sound(PlayAudio2D::new_once("sounds/ship_destroy.wav"));
         audio_manager.toggle_audio_off("sounds/thrusters.wav");
-        if let Ok((ship, transform, ship_velocity)) = ship_q.get(death.entity) {
-            let lines = line_renderer.get_lines(ship);
+        if let Ok((ship, transform, ship_velocity, line_mesh)) = ship_q.get(death.entity) {
+            let lines = &line_mesh.0;
             for line in lines.get_lines() {
-                line_renderer.spawn(
-                    LineGroup::from_line(*line),
-                    (
-                        transform.clone(),
-                        RigidBody::Dynamic,
-                        Mass(1.),
-                        LinearVelocity(ship_velocity.0 + random_vec2_range(-100.0..100.)),
-                        AngularVelocity(random_range(-1.0..1.)),
-                        LevelScoped,
-                    ),
-                );
+                commands.spawn((
+                    LineMesh(LineGroup::from_line(*line)),
+                    transform.clone(),
+                    RigidBody::Dynamic,
+                    Mass(1.),
+                    LinearVelocity(ship_velocity.0 + random_vec2_range(-100.0..100.)),
+                    AngularVelocity(random_range(-1.0..1.)),
+                    LevelScoped,
+                ));
             }
             commands.entity(ship).despawn_recursive();
             game_state.0 = GameState::GAMEOVER;

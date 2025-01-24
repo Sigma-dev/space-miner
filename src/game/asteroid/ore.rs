@@ -10,8 +10,8 @@ use crate::{
     health::Death,
     level_manager::LevelScoped,
     line_group::LineGroup,
+    line_mesh::LineMesh,
     rand::{random_range, random_vec2_range},
-    system_param::LineRenderer,
 };
 
 use super::Asteroid;
@@ -45,7 +45,7 @@ impl Plugin for AsteroidOrePlugin {
 }
 
 fn handle_asteroid_destroyed(
-    mut line_renderer: LineRenderer,
+    mut commands: Commands,
     mut death_e: EventReader<Death>,
     asteroid_q: Query<(&Transform, &Asteroid, &AsteroidOre)>,
 ) {
@@ -54,9 +54,9 @@ fn handle_asteroid_destroyed(
             for _ in 0..ore.amount {
                 let lines = get_lines_for_ore(ore.ore_type);
                 let collider = Collider::polyline(lines.to_unique_points_looped(), None);
-                let ore = line_renderer.spawn(
-                    lines,
-                    (
+                let ore = commands
+                    .spawn((
+                        LineMesh(lines),
                         RigidBody::Dynamic,
                         ExternalForce::new(random_vec2_range(-3000.0..3000.0))
                             .with_persistence(false),
@@ -71,13 +71,10 @@ fn handle_asteroid_destroyed(
                         )),
                         Ore,
                         LevelScoped,
-                    ),
-                );
-                let zone = line_renderer
-                    .commands
-                    .spawn((Sensor, Collider::circle(200.)))
+                    ))
                     .id();
-                line_renderer.commands.entity(ore).add_child(zone);
+                let zone = commands.spawn((Sensor, Collider::circle(200.))).id();
+                commands.entity(ore).add_child(zone);
             }
         }
     }

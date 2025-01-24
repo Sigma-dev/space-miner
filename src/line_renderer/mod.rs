@@ -1,10 +1,11 @@
 use bevy::{prelude::*, render::render_resource::*, sprite::*};
 use line::Line;
 use line_group::LineGroup;
+use line_mesh::LineMeshPlugin;
 
 pub mod line;
 pub mod line_group;
-pub mod system_param;
+pub mod line_mesh;
 
 const LINE_NUMBER: usize = 256;
 
@@ -13,7 +14,8 @@ pub struct LineRendererPlugin;
 impl Plugin for LineRendererPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(LineRendererWidth(0.01))
-            .add_plugins(Material2dPlugin::<LineRendererMaterial>::default());
+            .add_plugins(Material2dPlugin::<LineRendererMaterial>::default())
+            .add_plugins(LineMeshPlugin);
     }
 }
 

@@ -11,7 +11,6 @@ use game::{ship::spawn_ship, CurrentGameState, GameState};
 use health::HealthPlugin;
 use level_manager::{LevelManager, LevelManagerPlugin, LevelReset};
 use line_renderer::*;
-use system_param::LineRenderer;
 
 pub mod audio_manager;
 pub mod bevy_utils;
@@ -68,11 +67,10 @@ fn handle_reset(keys: Res<ButtonInput<KeyCode>>, mut level_manager: LevelManager
 fn level_setup(
     mut commands: Commands,
     mut level_manager: LevelManager,
-    mut line_renderer: LineRenderer,
     mut game_state: ResMut<CurrentGameState>,
 ) {
     game_state.0 = GameState::PLAYING;
-    let ship = spawn_ship(&mut commands, &mut line_renderer);
+    let ship = spawn_ship(&mut commands);
     let camera = spawn_camera(&mut level_manager, ship);
-    spawn_ui(&mut line_renderer, camera);
+    spawn_ui(&mut commands, camera);
 }

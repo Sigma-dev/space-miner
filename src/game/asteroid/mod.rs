@@ -12,8 +12,8 @@ use crate::{
     health::{Death, Health},
     level_manager::LevelScoped,
     line_group::LineGroup,
+    line_mesh::LineMesh,
     rand::random_range,
-    system_param::LineRenderer,
 };
 
 pub mod ore;
@@ -40,7 +40,7 @@ pub enum AsteroidContent {
 }
 
 fn spawn_random_asteroid(
-    mut line_renderer: LineRenderer,
+    commands: Commands,
     ship_q: Query<&Transform, With<Ship>>,
     spatial_query: SpatialQuery,
 ) {
@@ -55,7 +55,7 @@ fn spawn_random_asteroid(
     let random = random_range(0.0..1.0);
     if random > 0.8 && radius > 50. {
         spawn_asteroid(
-            &mut line_renderer,
+            commands,
             radius,
             world_pos,
             dir,
@@ -64,7 +64,7 @@ fn spawn_random_asteroid(
         );
     } else {
         spawn_asteroid(
-            &mut line_renderer,
+            commands,
             radius,
             world_pos,
             dir,
@@ -75,7 +75,7 @@ fn spawn_random_asteroid(
 }
 
 fn spawn_asteroid(
-    line_renderer: &mut LineRenderer,
+    mut commands: Commands,
     radius: f32,
     world_pos: Vec2,
     dir: Vec2,
@@ -101,9 +101,9 @@ fn spawn_asteroid(
     {
         return;
     }
-    let asteroid = line_renderer.spawn(
-        lines,
-        (
+    let asteroid = commands
+        .spawn((
+            LineMesh(lines),
             Transform::from_translation(world_pos.extend(0.)),
             RigidBody::Dynamic,
             Mass(1.),
@@ -112,10 +112,10 @@ fn spawn_asteroid(
             Health::new_destroy_on_death(10.),
             Asteroid,
             LevelScoped,
-        ),
-    );
+        ))
+        .id();
     if let Some(ore) = maybe_ore {
-        line_renderer.commands.entity(asteroid).insert(ore);
+        commands.entity(asteroid).insert(ore);
     }
 }
 

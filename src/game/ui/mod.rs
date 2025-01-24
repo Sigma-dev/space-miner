@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    blink::Blink, game::GameState, line::Line, line_group::LineGroup, system_param::LineRenderer,
+    blink::Blink, game::GameState, line::Line, line_group::LineGroup, line_mesh::LineMesh,
 };
 
 use super::{ship::inventory::InventoryUpdate, CurrentGameState};
@@ -39,7 +39,7 @@ impl StorageLine {
     }
 }
 
-pub fn spawn_ui(line_renderer: &mut LineRenderer, camera: Entity) {
+pub fn spawn_ui(commands: &mut Commands, camera: Entity) {
     let storage_height = 150.;
     let storage_width = 20.;
     let storage_ui_lines = LineGroup::generate_continuous_closed(vec![
@@ -59,36 +59,45 @@ pub fn spawn_ui(line_renderer: &mut LineRenderer, camera: Entity) {
             .offset(Vec2::new(-105., 140.)),
     );
 
-    let storage_ui = line_renderer.spawn(storage_ui_lines, Transform::from_xyz(550., -150., 0.));
-    let storage_line = line_renderer.spawn(
-        LineGroup::from_line(Line::new(
-            Vec2::new(-storage_width * 1.3, 0.),
-            Vec2::new(storage_width * 1.3, 0.),
-        )),
-        StorageLine::new(storage_height * 2.),
-    );
-    line_renderer.commands.entity(camera).add_child(storage_ui);
-    line_renderer
-        .commands
-        .entity(storage_ui)
-        .add_child(storage_line);
-    let death_ui = line_renderer
-        .commands
+    let storage_ui = commands
+        .spawn((
+            LineMesh(storage_ui_lines),
+            Transform::from_xyz(550., -150., 0.),
+        ))
+        .id();
+    let storage_line = commands
+        .spawn((
+            LineMesh(LineGroup::from_line(Line::new(
+                Vec2::new(-storage_width * 1.3, 0.),
+                Vec2::new(storage_width * 1.3, 0.),
+            ))),
+            StorageLine::new(storage_height * 2.),
+        ))
+        .id();
+    commands.entity(camera).add_child(storage_ui);
+    commands.entity(storage_ui).add_child(storage_line);
+    let death_ui = commands
         .spawn((DeathUI, Visibility::Hidden, Transform::default()))
         .id();
 
-    line_renderer.commands.entity(camera).add_child(death_ui);
-    let game_over = line_renderer.spawn(LineGroup::text("GAME OVER").scaled(7.).centered(), ());
-    line_renderer.commands.entity(death_ui).add_child(game_over);
+    commands.entity(camera).add_child(death_ui);
+    let game_over = commands
+        .spawn(LineMesh(LineGroup::text("GAME OVER").scaled(7.).centered()))
+        .id();
+    commands.entity(death_ui).add_child(game_over);
 
-    let press_r = line_renderer.spawn(
-        LineGroup::text("PRESS R TO TRY AGAIN")
-            .scaled(2.)
-            .centered()
-            .offset(-Vec2::Y * 100.),
-        Blink::new(2., true, Visibility::Hidden),
-    );
-    line_renderer.commands.entity(death_ui).add_child(press_r);
+    let press_r = commands
+        .spawn((
+            LineMesh(
+                LineGroup::text("PRESS R TO TRY AGAIN")
+                    .scaled(2.)
+                    .centered()
+                    .offset(-Vec2::Y * 100.),
+            ),
+            Blink::new(2., true, Visibility::Hidden),
+        ))
+        .id();
+    commands.entity(death_ui).add_child(press_r);
 }
 
 fn init_storage(mut line_q: Query<(&mut Transform, &StorageLine), Added<StorageLine>>) {

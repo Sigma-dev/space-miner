@@ -13,8 +13,8 @@ use crate::{
     level_manager::LevelScoped,
     line::Line,
     line_group::LineGroup,
+    line_mesh::LineMesh,
     rand::random_range,
-    system_param::LineRenderer,
 };
 
 use super::FireLaser;
@@ -39,7 +39,7 @@ fn handle_lasers(time: Res<Time>, mut lasers_q: Query<(&mut Transform, &Laser)>)
 }
 
 pub fn handle_laser_spawning(
-    mut line_renderer: LineRenderer,
+    mut commands: Commands,
     mut laser_e: EventReader<FireLaser>,
     mut audio_manager: AudioManager,
     time: Res<Time>,
@@ -50,17 +50,16 @@ pub fn handle_laser_spawning(
         let angle = direction.y.atan2(direction.x) - PI / 2.;
         let transform = Transform::from_translation(position.extend(0.))
             .with_rotation(Quat::from_rotation_z(angle)); //.looking_at(target, Vec3::new(0., 0., 1.));
-        line_renderer.spawn(
-            LineGroup::new(vec![Line::new(Vec2::ZERO, Vec2::new(0., 20.))]),
-            (
-                transform,
-                Collider::capsule(5., 40.),
-                Sensor,
-                Laser { speed: 20. },
-                LevelScoped,
-                DelayedDespawn::new(time.elapsed_secs(), 5.),
-            ),
-        );
+        let lines = LineGroup::new(vec![Line::new(Vec2::ZERO, Vec2::new(0., 20.))]);
+        commands.spawn((
+            LineMesh(lines),
+            transform,
+            Collider::capsule(5., 40.),
+            Sensor,
+            Laser { speed: 20. },
+            LevelScoped,
+            DelayedDespawn::new(time.elapsed_secs(), 5.),
+        ));
         audio_manager
             .play_sound(PlayAudio2D::new_once("sounds/laser.wav".to_owned()).with_volume(1.5));
     }
@@ -68,7 +67,6 @@ pub fn handle_laser_spawning(
 
 pub fn asteroid_collisions(
     mut commands: Commands,
-    mut line_renderer: LineRenderer,
     mut collision_event_reader: EventReader<CollisionStarted>,
     laser_q: Query<(Entity, &Transform), With<Laser>>,
     asteroid_q: Query<(Entity, &Transform), With<Asteroid>>,
@@ -89,17 +87,16 @@ pub fn asteroid_collisions(
                     Vec3::Z,
                     (180. as f32 + random_range(-60.0..60.)).to_radians(),
                 );
-            line_renderer.spawn(
-                LineGroup::from_line(Line::new(Vec2::new(0., 0.), Vec2::new(0., 10.)))
-                    .scaled(random_range(0.5..1.1)),
-                (
-                    Transform::from_translation(pos).with_rotation(rotation),
-                    RigidBody::Dynamic,
-                    LinearVelocity((rotation.mul_vec3(Vec3::Y) * random_range(300.0..1000.)).xy()),
-                    LinearDamping(5.),
-                    DelayedDespawn::new(time.elapsed_secs(), random_range(0.05..0.2)),
-                ),
-            );
+            let lines = LineGroup::from_line(Line::new(Vec2::new(0., 0.), Vec2::new(0., 10.)))
+                .scaled(random_range(0.5..1.1));
+            commands.spawn((
+                LineMesh(lines),
+                Transform::from_translation(pos).with_rotation(rotation),
+                RigidBody::Dynamic,
+                LinearVelocity((rotation.mul_vec3(Vec3::Y) * random_range(300.0..1000.)).xy()),
+                LinearDamping(5.),
+                DelayedDespawn::new(time.elapsed_secs(), random_range(0.05..0.2)),
+            ));
         }
         health_manager.damage(asteroid, 10.);
     }
