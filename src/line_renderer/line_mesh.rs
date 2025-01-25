@@ -21,8 +21,11 @@ pub fn on_change(
     line_width: Res<LineRendererWidth>,
 ) {
     for (entity, line) in line_q.iter() {
+        let Some(mut entity_commands) = commands.get_entity(entity) else {
+            continue;
+        };
         let mesh_bundle = lines_to_mesh(&line.0, line_width.0, &mut meshes, &mut line_materials);
-        commands.entity(entity).insert(mesh_bundle);
+        entity_commands.try_insert(mesh_bundle);
     }
 }
 
