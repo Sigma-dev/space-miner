@@ -1,5 +1,6 @@
 use audio_manager::{AudioManagerPlugin, AudioManagerResource};
 use avian2d::{prelude::Gravity, PhysicsPlugins};
+use bevy::asset::AssetMetaCheck;
 use bevy::{prelude::*, window::PresentMode};
 use blink::BlinkPlugin;
 use delayed_despawn::DelayedDespawnPlugin;
@@ -26,13 +27,18 @@ mod rand;
 fn main() {
     App::new()
         .add_plugins((
-            DefaultPlugins.set(WindowPlugin {
-                primary_window: Some(Window {
-                    present_mode: PresentMode::AutoNoVsync,
+            DefaultPlugins
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        present_mode: PresentMode::AutoNoVsync,
+                        ..default()
+                    }),
+                    ..default()
+                })
+                .set(AssetPlugin {
+                    meta_check: AssetMetaCheck::Never,
                     ..default()
                 }),
-                ..default()
-            }),
             PhysicsPlugins::default(),
         ))
         .add_plugins((
