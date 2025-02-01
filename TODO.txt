@@ -16,9 +16,10 @@ Handle death:
 - Restart the scene if r is pressed V
 FIX: fix thrusters sound after death V
 Make the ores have actual colliders V
-Clean and push to a repo
-Refactor linerenderer
-Make a lil video for #showcase
+Clean and push to a repo V
+Refactor linerenderer V
+Make a lil video for #showcase V
+Make asteroids break off into smaller pieces
 Add shops with selling point
  - Make a big asteroid spawn near the player spawn with something on it's surface
  - Conceptualize the art and make it

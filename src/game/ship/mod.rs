@@ -11,6 +11,7 @@ use crate::{
     audio_manager::{AudioManager, PlayAudio2D},
     bevy_utils::query_double,
     blink::Blink,
+    camera_shake::ShakeCamera,
     game::asteroid::Asteroid,
     health::{DamageTaken, Death, Health, HealthHitInvincibilityTime, HealthManager},
     level_manager::LevelScoped,
@@ -161,11 +162,13 @@ pub fn ship_hurt(
     mut commands: Commands,
     mut audio_manager: AudioManager,
     mut damage_r: EventReader<DamageTaken>,
+    mut shake_w: EventWriter<ShakeCamera>,
     ship_q: Query<Entity, With<Ship>>,
 ) {
     for damage in damage_r.read() {
         if let Ok(ship) = ship_q.get(damage.entity) {
             audio_manager.play_sound(PlayAudio2D::new_once("sounds/hurt.wav".to_string()));
+            shake_w.send(ShakeCamera::new(1.));
             commands.entity(ship).insert(LineMesh(
                 get_ship_and_thrusters_shape((damage.new_hp / 10.) as u32).0,
             ));

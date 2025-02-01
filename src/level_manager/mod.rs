@@ -17,8 +17,8 @@ pub struct LevelManager<'w, 's> {
 }
 
 impl<'w, 's> LevelManager<'w, 's> {
-    pub fn spawn<T: Bundle>(&mut self, bundle: T) -> Entity {
-        self.commands.spawn((bundle, LevelScoped)).id()
+    pub fn spawn<T: Bundle>(&mut self, bundle: T) -> EntityCommands {
+        self.commands.spawn((bundle, LevelScoped))
     }
 
     pub fn reset(&mut self) {

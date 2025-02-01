@@ -3,6 +3,7 @@ use avian2d::{prelude::Gravity, PhysicsPlugins};
 use bevy::asset::AssetMetaCheck;
 use bevy::{prelude::*, window::PresentMode};
 use blink::BlinkPlugin;
+use camera_shake::CameraShakePlugin;
 use delayed_despawn::DelayedDespawnPlugin;
 use follow_entity::FollowEntityPlugin;
 use game::camera::spawn_camera;
@@ -16,6 +17,7 @@ use line_renderer::*;
 pub mod audio_manager;
 pub mod bevy_utils;
 mod blink;
+mod camera_shake;
 pub mod delayed_despawn;
 mod follow_entity;
 mod game;
@@ -50,6 +52,7 @@ fn main() {
             FollowEntityPlugin,
             GamePlugin,
             LevelManagerPlugin,
+            CameraShakePlugin,
         ))
         .insert_resource(ClearColor(Color::srgb(0.05, 0.05, 0.05)))
         .insert_resource(Gravity(Vec2::ZERO))

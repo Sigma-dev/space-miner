@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 approx = "0.5.1"
 bevy = { version = "0.15.0", features = ["dynamic_linking", "wav"] }
+noisy_bevy = "0.8"
 itertools = "0.13.0"
 avian2d = "0.2"
 rand = "0.8"

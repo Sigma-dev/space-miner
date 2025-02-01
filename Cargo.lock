@@ -463,6 +463,7 @@ dependencies = [
  "avian2d",
  "bevy",
  "itertools 0.13.0",
+ "noisy_bevy",
  "rand",
 ]
 
@@ -2898,6 +2899,15 @@ dependencies = [
  "cfg-if",
  "cfg_aliases 0.2.1",
  "libc",
+]
+
+[[package]]
+name = "noisy_bevy"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5e24fedeca6003c0d04b916346d386f5a777aee89bf611b3960ab5d64977c165"
+dependencies = [
+ "bevy",
 ]
 
 [[package]]
